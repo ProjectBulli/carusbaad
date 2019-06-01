@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-#export RUSTFLAGS='-C prefer-dynamic'
+export PKG_CONFIG_ALLOW_CROSS=1
 export RUSTFLAGS='-C link-arg=-s' #strip debug information
-cargo build --release
-ls -Ss1pq --block-size=1024 target/release/carusbaad
+cargo deb
+ls -Ss1pq --block-size=1024 target/*/release/carusbaad
+ls -Ss1pq --block-size=1024 target/debian/*.deb
+dpkg-deb -c target/debian/*.deb
