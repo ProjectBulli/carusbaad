@@ -63,7 +63,7 @@ fn open(device: Device, _device_desc: DeviceDescriptor) -> Result<(), Error> {
     let rc_config = Arc::new(config);
     let example_com = webpki::DNSNameRef::try_from_ascii_str("example.com").unwrap();
     let mut client = rustls::ClientSession::new(&rc_config, example_com);
-    let mut socket = USBBulkStream { read_endpoint: 129, write_endpoint: 1, timeout, device_handle: handle };//TODO this must be the usb connection
+    let mut socket = USBBulkStream::new ( 129,  1, timeout, handle );//TODO this must be the usb connection
     let mut s = Stream::new ( &mut client,  &mut socket);
     println!("first contact");
     s.read(&mut buffer);

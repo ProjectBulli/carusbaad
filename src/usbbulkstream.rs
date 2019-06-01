@@ -1,8 +1,22 @@
+use std::io::{Read, Write};
+use std::time::Duration;
+use libusb::DeviceHandle;
+use std::io;
+
 pub struct USBBulkStream<'l> {
     read_endpoint: u8,
     write_endpoint: u8,
     timeout: Duration,
     device_handle: DeviceHandle<'l>
+}
+
+impl<'l> USBBulkStream<'l> {
+    pub fn new(read_endpoint: u8,
+               write_endpoint: u8,
+               timeout: Duration,
+               device_handle: DeviceHandle<'l>) -> USBBulkStream {
+        USBBulkStream {read_endpoint, write_endpoint, timeout, device_handle}
+    }
 }
 
 impl <'l> Read for USBBulkStream<'l> {
