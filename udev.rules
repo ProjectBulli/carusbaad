@@ -4,3 +4,4 @@ ACTION=="add", SUBSYSTEM=="usb", ATTRS{idProduct}=="11522", ATTRS{idVendor}=="63
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idProduct}=="11523", ATTRS{idVendor}=="6353", MODE="0660", GROUP="users", RUN+="/usr/bin/carusbaad $attr{busnum} $attr{devnum}"
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idProduct}=="11524", ATTRS{idVendor}=="6353", MODE="0660", GROUP="users", RUN+="/usr/bin/carusbaad $attr{busnum} $attr{devnum}"
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idProduct}=="11525", ATTRS{idVendor}=="6353", MODE="0660", GROUP="users", RUN+="/usr/bin/carusbaad $attr{busnum} $attr{devnum}"
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idProduct}=="2d01", ATTRS{idVendor}=="18d1", MODE="0660", GROUP="users", RUN+="/usr/bin/carusbaad $attr{busnum} $attr{devnum}"
