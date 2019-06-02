@@ -9,10 +9,16 @@ description = "Car USB Accessory Mode"
 [dependencies]
 libusb="0.3.0"
 webpki="0.19.1"
-rustls="0.15.2"
 bytes = "0.4.12"
 prost = "0.5.0"
 hex = "0.3.2"
+log = ""
+chrono = ""
+env_logger = ""
+
+[dependencies.rustls]
+version = "0.15.2"
+features = ["logging"]
 
 [build-dependencies]
 prost-build = { version = "0.5.0" }

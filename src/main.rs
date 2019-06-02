@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate log;
+extern crate chrono;
+extern crate env_logger;
 extern crate libusb;
 extern crate webpki;
 extern crate hex;
@@ -5,13 +9,14 @@ extern crate hex;
 mod x509;
 mod usbbulkstream;
 
+use chrono::Local;
+use env_logger::Builder;
+use log::LevelFilter;
 use usbbulkstream::USBBulkStream;
-
 use x509::{PRIVATE_KEY, CERTIFICATE};
 use std::sync::Arc;
 use std::time::Duration;
 use std::io;
-
 use libusb::{Device, DeviceDescriptor, Error, DeviceHandle};
 use std::io::{Write, Read, BufReader};
 use rustls::Stream;
@@ -22,6 +27,18 @@ const PRODUCT_ID_MAX: u16 = 0x2D05;
 
 fn main() -> Result<(), Error> {
     println!("CarUSBAAd");
+    Builder::new()
+        .format(|buf, record| {
+            writeln!(buf,
+                     "{} [{}] - {}",
+                     Local::now().format("%Y-%m-%dT%H:%M:%S"),
+                     record.level(),
+                     record.args()
+            )
+        })
+        .filter(None, LevelFilter::Trace)
+        .init();
+
     let context = libusb::Context::new()?;
     for device in context.devices()?.iter() {
         let device_desc = device.device_descriptor()?;
@@ -39,8 +56,8 @@ fn main() -> Result<(), Error> {
 fn open(device: Device, _device_desc: DeviceDescriptor) -> Result<(), Error> {
     println!("open {} {}", device.bus_number(), device.address());
     let version_package: [u8; 10] = [0, 3, 0, 6, 0, 1, 0, 1, 0, 1];
-    let timeout = Duration::from_secs(1);
-    let mut buffer: [u8; 12] = [0; 12];
+    let timeout = Duration::from_secs(10);
+    let mut buffer: [u8; 1024] = [0; 1024];
     let mut handle = device.open()?;
     let configuration = device.active_config_descriptor()?;
     for interface in configuration.interfaces() {
@@ -57,7 +74,7 @@ fn open(device: Device, _device_desc: DeviceDescriptor) -> Result<(), Error> {
     handle.write_bulk(1, &version_package, timeout)?; //Direction::Out
     let count = handle.read_bulk(129, &mut buffer, timeout)?; //Direction::In
     //[0, 3, 0, 8, 0, 2, 0, 1, 0, 5, 0, 0]
-    println!("{} {:?}", count, buffer);
+    //println!("{} {:?}", count, buffer);
     let mut config = rustls::ClientConfig::new();
     load_key_and_cert(&mut config);
     let rc_config = Arc::new(config);
@@ -66,8 +83,14 @@ fn open(device: Device, _device_desc: DeviceDescriptor) -> Result<(), Error> {
     let mut socket = USBBulkStream::new ( 129,  1, timeout, handle );//TODO this must be the usb connection
     let mut s = Stream::new ( &mut client,  &mut socket);
     println!("first contact");
-    s.read(&mut buffer);
-    println!("first read {}", hex::encode(buffer));
+    let read_result = s.read(&mut buffer);
+    match read_result {
+        Err(E) => println!("Error reading {:?}", E),
+        Ok(size) => println!("successful read {} bytes", size)
+    }
+    println!("read done");
+    //0 3 0 8 2 0 1 0 5
+   // println!("first read {}", hex::encode(buffer));
     s.write("foo".as_bytes());
     println!("first write");
 
@@ -90,16 +113,4 @@ fn load_key_and_cert(config: &mut rustls::ClientConfig) {
     let privkey = load_private_key();
 
     config.set_single_client_cert(certs, privkey);
-}
-
-// Include the `items` module, which is generated from items.proto.
-pub mod items {
-    include!(concat!(env!("OUT_DIR"), "/snazzy.items.rs"));
-}
-
-pub fn create_large_shirt(color: String) -> items::Shirt {
-    let mut shirt = items::Shirt::default();
-    shirt.color = color;
-    shirt.set_size(items::shirt::Size::Large);
-    shirt
 }
