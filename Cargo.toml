@@ -7,23 +7,28 @@ readme = "README.md"
 description = "Car USB Accessory Mode"
 
 [dependencies]
-libusb="0.3.0"
-webpki="0.19.1"
-bytes = "0.4.12"
-prost = "0.5.0"
-hex = "0.3.2"
+libusb=""
+webpki=""
+bytes = ""
+prost = ""
+hex = ""
 log = ""
 chrono = ""
 env_logger = ""
-webpki-roots = "0.16"
+webpki-roots = ""
 native-tls = ""
+openssl-sys = ""
+openssl = ""
 
 [dependencies.rustls]
-version = "0.15.2"
+version = ""
 features = ["logging"]
 
 [build-dependencies]
-prost-build = { version = "0.5.0" }
+prost-build = { version = "" }
+#protoc-rust = "2.0"
+# proto-codegen-pure = "2.3"
+# protobuf-codegen-pure = {git = "https://github.com/stepancheg/rust-protobuf.git" }
 
 [profile.release]
 lto = true
@@ -32,7 +37,7 @@ debug = false
 debug-assertions = false
 
 [package.metadata.deb]
-depends = "udev"
+depends = "udev systemd"
 extended-description = """\
 car aa
 """

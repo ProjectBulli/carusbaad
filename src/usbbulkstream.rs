@@ -1,7 +1,8 @@
-use std::io::{Read, Write};
-use std::time::Duration;
-use libusb::DeviceHandle;
+use std::io::{ Read, Write};
 use std::io;
+use std::time::Duration;
+
+use libusb::DeviceHandle;
 
 pub struct USBBulkStream<'l> {
     read_endpoint: u8,
@@ -21,13 +22,19 @@ impl<'l> USBBulkStream<'l> {
 
 impl <'l> Read for USBBulkStream<'l> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
-        self.device_handle.read_bulk(self.read_endpoint, buf, self.timeout).map_err(io_error_from_libusb_error)
+        println!("USB: read endpoint: {} length: {} timeout: {:?}", self.read_endpoint, buf.len(), self.timeout);
+        let result = self.device_handle.read_bulk(self.read_endpoint, buf, self.timeout);
+        println!("USB: read {:?}", result);
+        result.map_err(io_error_from_libusb_error)
     }
 }
 
 impl <'l> Write for USBBulkStream<'l> {
     fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
-        self.device_handle.write_bulk(self.write_endpoint, buf, self.timeout).map_err(io_error_from_libusb_error)
+        println!("USB: write endpoint: {} length: {} timeout: {:?}", self.write_endpoint, buf.len(), self.timeout);
+        let result = self.device_handle.write_bulk(self.write_endpoint, buf, self.timeout);
+        println!("USB: write: {:?}", result);
+        result.map_err(io_error_from_libusb_error)
     }
 
     fn flush(&mut self) -> Result<(), io::Error> {
@@ -35,8 +42,8 @@ impl <'l> Write for USBBulkStream<'l> {
     }
 }
 
-//stupid workaroud, needs way better
-fn io_error_from_libusb_error(error:libusb::Error) -> io::Error {
+//stupid workaround, needs to be way better
+pub fn io_error_from_libusb_error(error:libusb::Error) -> io::Error {
     io::Error::from_raw_os_error(-libusb_error_as_number(error))
 }
 
