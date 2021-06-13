@@ -1,12 +1,13 @@
-use rustls::{ClientConfig, ClientSession, Stream, ServerCertVerifier, ServerCertVerified, RootCertStore, TLSError, Certificate};
-use libusb::{DeviceHandle, Error};
-use webpki::DNSNameRef;
-
-use crate::usbbulkstream::{USBBulkStream};
-use crate::x509::{CERTIFICATE, PRIVATE_KEY};
 use std::io::{BufReader, Read, Write};
 use std::sync::Arc;
 use std::time::Duration;
+
+use libusb::{DeviceHandle, Error};
+use rustls::{Certificate, ClientConfig, ClientSession, RootCertStore, ServerCertVerified, ServerCertVerifier, Stream, TLSError};
+use webpki::{DNSNameRef};
+
+use crate::usbbulkstream::USBBulkStream;
+use crate::x509::{CERTIFICATE, PRIVATE_KEY};
 
 const TIMEOUT: Duration = Duration::from_secs(20);
 
