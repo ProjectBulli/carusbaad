@@ -34,3 +34,23 @@ impl Channel {
         }
     }
 }
+
+impl ToString for Channel {
+    fn to_string(&self) -> String {
+        match &self {
+            Channel::CONTROL => "CONTROL",
+            Channel::SENSOR => "SENSOR",
+            Channel::VIDEO => "VIDEO",
+            Channel::INPUT => "INPUT",
+            Channel::AUDIO => "AUDIO",
+            Channel::AUDIO1 => "AUDIO1",
+            Channel::AUDIO2 => "AUDIO2",
+            Channel::MIC => "MIC",
+            Channel::BLUETOOTH => "BLUETOOTH",
+            Channel::MUSIC_PLAYBACK => "MUSIC_PLAYBACK",
+            Channel::NAVIGATION_DIRECTION => "NAVIGATION_DIRECTIONS",
+            Channel::NOTIFICATION => "NOTIFICATION",
+            Channel::PHONE_STATUS => "PHONE_STATUS"
+        }.to_string()
+    }
+}
