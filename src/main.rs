@@ -28,7 +28,7 @@ use ntls::connect_ntls;
 mod opensslx;
 use opensslx::connect_openssl;
 use crate::usbbulkstream::USBBulkStream;
-use crate::rawmessage::{raw_message, VERSION_REQUEST};
+use crate::rawmessage::{raw_message, version_request, tls_handshake, create_tlsclient, status_ok};
 use crate::channel::Channel;
 
 mod rawmessage;
@@ -59,7 +59,7 @@ fn open(device: Device, _device_desc: DeviceDescriptor) -> Result<(), Error> {
 
     let mut stream = USBBulkStream::new(129, 1, TIMEOUT, handle);
    stream.handshake().unwrap();
-    connect_rustls( &mut stream )?;
+    //connect_rustls( &mut stream )?;
     //connect_ntls( handle );
   //  connect_openssl( handle );
     Ok(())
@@ -71,7 +71,7 @@ impl <'l> USBBulkStream<'l> {
         //let version_package: [u8; 10] = [0, 3, 0, 6, 0, 1, 0, 1, 0, 1];
         //self.write(&version_package);
 
-        raw_message(Channel::CONTROL, 3, 1, &VERSION_REQUEST, self);
+        version_request(self);
         println!("waiting for handshake response");
         let count = self.read(&mut buffer);
         let size = count.unwrap();
@@ -80,6 +80,9 @@ impl <'l> USBBulkStream<'l> {
             let response_excepted: [u8;12] =   [0, 3, 0, 8, 0, 2, 0, 1, 0, 6, 0, 0];
             if buffer.starts_with(&response_excepted) {
                 println!("handshake done");
+                tls_handshake(&mut create_tlsclient(), self);
+                println!("tls done");
+                status_ok(self);
                 Ok(size )
             } else {
                 Err(io::Error::from_raw_os_error(-(size as i32)))

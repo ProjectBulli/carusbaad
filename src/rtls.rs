@@ -11,7 +11,7 @@ use crate::x509::{CERTIFICATE, PRIVATE_KEY};
 
 const TIMEOUT: Duration = Duration::from_secs(20);
 
-struct DummyServerCertVerifier {}
+pub struct DummyServerCertVerifier {}
 
 impl ServerCertVerifier for DummyServerCertVerifier {
     fn verify_server_cert(&self, roots: &RootCertStore, presented_certs: &[Certificate], dns_name: DNSNameRef<'a>, ocsp_response: &[u8]) -> Result<ServerCertVerified, TLSError> {
@@ -53,7 +53,7 @@ fn load_private_key() -> Result<rustls::PrivateKey, ()> {
     Ok(keys[0].clone())
 }
 
-fn load_key_and_cert(config: &mut rustls::ClientConfig) -> Result<(), ()>{
+pub fn load_key_and_cert(config: &mut rustls::ClientConfig) -> Result<(), ()>{
     let certs = load_certs()?;
     let privkey = load_private_key()?;
 

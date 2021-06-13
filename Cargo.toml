@@ -19,6 +19,7 @@ webpki-roots = "0.22.0"
 native-tls = "0.2.7"
 openssl-sys = "0.9.63"
 openssl = "0.10.34"
+bytebuffer = "0.2.1"
 
 [dependencies.rustls]
 version = "0.19.1"
