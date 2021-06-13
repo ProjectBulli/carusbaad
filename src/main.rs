@@ -1,3 +1,4 @@
+#![feature(in_band_lifetimes)]
 extern crate chrono;
 extern crate env_logger;
 extern crate hex;
@@ -28,8 +29,10 @@ mod opensslx;
 use opensslx::connect_openssl;
 use crate::usbbulkstream::USBBulkStream;
 use crate::rawmessage::{raw_message, VERSION_REQUEST};
+use crate::channel::Channel;
 
 mod rawmessage;
+mod channel;
 
 const VENDOR_GOOGLE: u16 = 0x18d1;
 const PRODUCT_ID_MIN: u16 = 0x2D00;
@@ -68,12 +71,13 @@ impl <'l> USBBulkStream<'l> {
         //let version_package: [u8; 10] = [0, 3, 0, 6, 0, 1, 0, 1, 0, 1];
         //self.write(&version_package);
 
-        raw_message(0, 3, 1, &VERSION_REQUEST, self);
+        raw_message(Channel::CONTROL, 3, 1, &VERSION_REQUEST, self);
         println!("waiting for handshake response");
         let count = self.read(&mut buffer);
         let size = count.unwrap();
         if size == 12 {
-            let response_excepted: [u8;12] = [0, 3, 0, 8, 0, 2, 0, 1, 0, 5, 0, 0];
+            //let response_excepted: [u8;12] = [0, 3, 0, 8, 0, 2, 0, 1, 0, 5, 0, 0];
+            let response_excepted: [u8;12] =   [0, 3, 0, 8, 0, 2, 0, 1, 0, 6, 0, 0];
             if buffer.starts_with(&response_excepted) {
                 println!("handshake done");
                 Ok(size )

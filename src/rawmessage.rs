@@ -1,17 +1,19 @@
 use std::io::Write;
 use std::io;
+use crate::channel::Channel;
 
 /*
  see https://github.com/harry1453/android-auto-headunit/blob/master/app/src/main/java/info/anodsplace/headunit/aap/protocol/messages/Messages.kt
+ https://github.com/anod/headunit/blob/master/app/src/main/java/info/anodsplace/headunit/aap/AapTransport.kt
 */
 
 pub const VERSION_REQUEST:[u8;4] = [0, 1, 0, 1];
 
-pub fn raw_message(channel: i32, flags: i32, type_x: i32, data: &[u8], stream: &mut impl Write) -> io::Result<usize> {
+pub fn raw_message(channel: Channel, flags: i32, type_x: i32, data: &[u8], stream: &mut impl Write) -> io::Result<usize> {
     let size = data.len();
     let total = 6 + size;
     let buffer:[u8;6] = [
-        channel as u8,
+        channel.asInt(),
         flags as u8,
         high_byte(size+2),
         low_byte(size + 2),
@@ -55,7 +57,7 @@ mod tests {
     fn test_raw_message() {
 
         let mut mock = Mock::new();
-        raw_message(0, 3, 1, &VERSION_REQUEST, &mut mock).unwrap();
+        raw_message(Channel::CONTROL, 3, 1, &VERSION_REQUEST, &mut mock).unwrap();
         assert_eq!(mock.buffer, [0, 3, 0, 6, 0, 1, 0, 1, 0, 1]);
     }
 

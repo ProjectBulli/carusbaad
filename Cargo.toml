@@ -22,7 +22,7 @@ openssl = ""
 
 [dependencies.rustls]
 version = ""
-features = ["logging"]
+features = ["logging", "dangerous_configuration"]
 
 [build-dependencies]
 prost-build = { version = "" }

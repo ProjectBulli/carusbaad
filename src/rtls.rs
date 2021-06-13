@@ -1,4 +1,4 @@
-use rustls::{ClientConfig, ClientSession, Stream};
+use rustls::{ClientConfig, ClientSession, Stream, ServerCertVerifier, ServerCertVerified, RootCertStore, TLSError, Certificate};
 use libusb::{DeviceHandle, Error};
 use webpki::DNSNameRef;
 
@@ -10,14 +10,22 @@ use std::time::Duration;
 
 const TIMEOUT: Duration = Duration::from_secs(20);
 
+struct DummyServerCertVerifier {}
+
+impl ServerCertVerifier for DummyServerCertVerifier {
+    fn verify_server_cert(&self, roots: &RootCertStore, presented_certs: &[Certificate], dns_name: DNSNameRef<'a>, ocsp_response: &[u8]) -> Result<ServerCertVerified, TLSError> {
+        println!("DummyServerCertVerifier");
+        Ok(ServerCertVerified::assertion())
+    }
+}
+
 pub fn connect_rustls(socket: &mut USBBulkStream) -> Result<(), Error> {
     let mut buffer: [u8; 1024] = [0; 1024];
     let mut client_config = ClientConfig::new();
 
     client_config.enable_sni = false;
     client_config.enable_early_data = true;
-
-//    client_config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+    client_config.dangerous().set_certificate_verifier(Arc::new( DummyServerCertVerifier {}));
 
     load_key_and_cert(&mut client_config).unwrap();
     //client_config.versions = vec![];
