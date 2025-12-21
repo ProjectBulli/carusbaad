@@ -2,28 +2,18 @@
 name = "carusbaad"
 version = "0.1.0"
 authors = ["nexos"]
-edition = "2018"
+edition = "2024"
 readme = "README.md"
 description = "Car USB Accessory Mode"
 
 [dependencies]
-libusb="0.3.0"
-webpki="0.21.2"
-bytes = "1.0.1"
-prost = "0.7.0"
-hex = "0.4.3"
-log = "0.4.14"
-chrono = "0.4.19"
-env_logger = "0.8.4"
-webpki-roots = "0.22.0"
-native-tls = "0.2.7"
-openssl-sys = "0.9.63"
-openssl = "0.10.34"
-bytebuffer = "0.2.1"
+rusb = "0.9.4"
+bitflags = "2.10.0"
+bytebuffer = "2.3.0"
 
 [dependencies.rustls]
-version = "0.19.1"
-features = ["logging", "dangerous_configuration"]
+version = "0.23.35"
+features = ["logging"]
 
 #[build-dependencies]
 #prost-build = { version = "" }

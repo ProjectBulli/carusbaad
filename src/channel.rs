@@ -16,7 +16,7 @@ pub enum Channel {
 }
 
 impl Channel {
-    pub fn asInt(&self) -> u8 {
+    pub fn as_int(&self) -> u8 {
         match &self  {
             Channel::CONTROL => 0,
             Channel::SENSOR => 1,

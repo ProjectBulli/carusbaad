@@ -1,26 +1,28 @@
-use std::io::{ Read, Write};
+use crate::channel::Channel;
+use crate::flags::Flags;
+use crate::frame::{raw_messsage_header, FrameSender};
+use rusb::{DeviceHandle, UsbContext};
 use std::io;
+use std::io::{Read, Write};
 use std::time::Duration;
 
-use libusb::DeviceHandle;
-
-pub struct USBBulkStream<'l> {
+pub struct USBBulkStream<C:UsbContext> {
     read_endpoint: u8,
     write_endpoint: u8,
     timeout: Duration,
-    device_handle: DeviceHandle<'l>
+    device_handle: DeviceHandle<C>
 }
 
-impl<'l> USBBulkStream<'l> {
+impl<C:UsbContext> USBBulkStream<C> {
     pub fn new(read_endpoint: u8,
                write_endpoint: u8,
                timeout: Duration,
-               device_handle: DeviceHandle<'l>) -> USBBulkStream {
+               device_handle: DeviceHandle<C>) -> USBBulkStream<C> {
         USBBulkStream {read_endpoint, write_endpoint, timeout, device_handle}
     }
 }
 
-impl <'l> Read for USBBulkStream<'l> {
+impl <C:UsbContext> Read for USBBulkStream<C> {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
         println!("USB: read endpoint: {} length: {} timeout: {:?}", self.read_endpoint, buf.len(), self.timeout);
         let result = self.device_handle.read_bulk(self.read_endpoint, buf, self.timeout);
@@ -29,7 +31,7 @@ impl <'l> Read for USBBulkStream<'l> {
     }
 }
 
-impl <'l> Write for USBBulkStream<'l> {
+impl <C:UsbContext> Write for USBBulkStream<C> {
     fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
         println!("USB: write endpoint: {} length: {} timeout: {:?}", self.write_endpoint, buf.len(), self.timeout);
         let result = self.device_handle.write_bulk(self.write_endpoint, buf, self.timeout);
@@ -43,25 +45,36 @@ impl <'l> Write for USBBulkStream<'l> {
 }
 
 //stupid workaround, needs to be way better
-pub fn io_error_from_libusb_error(error:libusb::Error) -> io::Error {
+pub fn io_error_from_libusb_error(error:rusb::Error) -> io::Error {
     io::Error::from_raw_os_error(-libusb_error_as_number(error))
 }
 
-fn libusb_error_as_number(error:libusb::Error) -> i32 {
+//TODO use ErrorCode
+fn libusb_error_as_number(error:rusb::Error) -> i32 {
     match error {
-        libusb::Error::Success => 0,
-        libusb::Error::Io => -101,
-        libusb::Error::InvalidParam => -102,
-        libusb::Error::Access => -103,
-        libusb::Error::NoDevice => -104,
-        libusb::Error::NotFound => -105,
-        libusb::Error::Busy => -106,
-        libusb::Error::Timeout => -107,
-        libusb::Error::Overflow => -108,
-        libusb::Error::Pipe => -109,
-        libusb::Error::Interrupted => -110,
-        libusb::Error::NoMem => -111,
-        libusb::Error::NotSupported => -112,
-        libusb::Error::Other => -113
+        rusb::Error::Io => -101,
+        rusb::Error::InvalidParam => -102,
+        rusb::Error::Access => -103,
+        rusb::Error::NoDevice => -104,
+        rusb::Error::NotFound => -105,
+        rusb::Error::Busy => -106,
+        rusb::Error::Timeout => -107,
+        rusb::Error::Overflow => -108,
+        rusb::Error::Pipe => -109,
+        rusb::Error::Interrupted => -110,
+        rusb::Error::NoMem => -111,
+        rusb::Error::NotSupported => -112,
+        rusb::Error::Other => -113,
+        rusb::Error::BadDescriptor => -114,
+    }
+}
+
+
+//TODO impl dyn Writer
+impl <C:UsbContext> FrameSender for  USBBulkStream<C> {
+    fn send(&mut self, channel: Channel, flags: Flags, type_x: i32, data: &[u8]) -> io::Result<usize> {
+        let total = raw_messsage_header(channel, flags, type_x, self, data.len())?;
+        let foo = self.write(data)?;
+        Ok(total + foo)
     }
 }
